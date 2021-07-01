@@ -1,1 +1,0 @@
-# linuxhuskarl.github.io
