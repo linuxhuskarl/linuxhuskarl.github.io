@@ -171,18 +171,22 @@ W pliku `main.c` podstawowymi zmianami, które musimy wykonać, są:
 
 ![Private Defines](/assets/pdefine.png)
 
+{:start="2"}
 2. Dodać definicję funkcji stanowiącej ciało głównego zadania
 
 ![Private Function Prototypes](/assets/pfprototypes.png)
 
+{:start="3"}
 3. Dodać TCB głównego zadania oraz zaalokować obszar stosu zadania.
 
 ![Private Variables](/assets/pvariables.png)
 
+{:start="4"}
 4. Dostosować ciało funkcji `main` do pracy z uC/OS-III.
 
 ![Main Function](/assets/mainfunc.png)
 
+{:start="5"}
 5. Zaimplementować funkcję stanowiącą ciało głównego zadania.
 
 ![AppTaskStart Function](/assets/apptaskstartfunc.png)
