@@ -6,28 +6,42 @@ categories:
   - Embedded
 tags:
   - STM32
-  - uC/OS-III 
+  - uC/OS-III
 ---
 
-W niniejszym artykule przygotujemy szablon projektu STM32CubeMX do pracy ze systemem uC/OS-III.
+W niniejszym samouczku przygotujemy szablon projektu STM32CubeMX do pracy z
+systemem uC/OS-III.
 
 > English version is in progress.
 
 ### Motywacja
 
-Kod źródłowy systemu uC/OS-III został udostępniony na licencji Apache v2.0 na początku 2020 roku i od tego czasu nie zyskał dużej popularności, co moim zdaniem mogłoby ulec zmianie, ponieważ system ten jest wyjątkowo dobrze opracowany i ma dużą wartość naukową. Niestety w związku z niską popularnością systemu w Internecie brakuje materiałów ułatwiajacych rozpoczęcie z nim pracy.
+Kod źródłowy systemu uC/OS-III został udostępniony na licencji Apache v2.0 na
+początku 2020 roku i od tego czasu nie zyskał dużej popularności. Moim
+zdaniem mogłoby to ulec zmianie, ponieważ system ten jest wyjątkowo dobrze
+opracowany i ma dużą wartość naukową. Niestety w związku z niską
+popularnością systemu w Internecie brakuje materiałów ułatwiających
+rozpoczęcie z nim pracy.
 
-Celem niniejszego artykułu jest wypełnienie tej luki poprzez wykorzystanie darmowego i niekomercyjnego oprogramowania do konfiguracji projektów STM32CubeMX oraz w pełni darmowego i otwartoźródłowego zestawu narzędzi kompilacyjnych GNU GCC oraz GNU Make. 
+Celem niniejszego samouczka jest wypełnienie tej luki poprzez wykorzystanie
+darmowego i niekomercyjnego oprogramowania do konfiguracji projektów
+STM32CubeMX oraz w pełni darmowego i otwartoźródłowego zestawu narzędzi
+kompilacyjnych GNU GCC oraz GNU Make.
 
 ---
 
 ## Wygenerowanie projektu STM32CubeMX
 
-Skonfigurujmy projekt wedle uznania i potrzeb.
+Skonfigurujmy projekt wedle uznania i potrzeb. Ja swój projekt wykonuję na
+płytce z STM32F411CE, ale większość instrukcji w niniejszym samouczku powinno
+być niezależne od konkretnego mikrokontrolera.
 
-**Kluczowy krok, o którym trzeba pamiętać**: zmieniamy źródło zegara systemowego dla HAL. W innym wypadku powstaną konflikty i przestaną działać funkcje oparte o opóźnienia (np. pooling).
+**Kluczowy krok, o którym trzeba pamiętać**: zmieniamy źródło zegara
+systemowego dla HAL. W innym wypadku powstaną konflikty i przestaną działać
+funkcje oparte o opóźnienia (np. pooling).
 
-W zakładce `System Core > SYS` zmieniamy `Timebase Source` na dowolny inny niż `SysTick`.
+W zakładce `System Core > SYS` zmieniamy `Timebase Source` na dowolny inny niż
+`SysTick`.
 
 ![Timebase Source](/assets/timebase-source.png)
 
@@ -37,7 +51,9 @@ W zakładce `Project Manager` zmieniamy `Toolchain/IDE` na `Makefile`.
 
 ## Pobranie kodu źródłowego uC/OS-III
 
-*Krok opcjonalny*: Otwieramy okno terminala w katalogu nowoutworzonego projektu. Zakładamy nowe repozytorium gita i dodajemy wszystkie pliki źródłowe.
+*Krok opcjonalny*: Otwieramy okno terminala w katalogu nowoutworzonego
+projektu. Zakładamy nowe repozytorium gita i dodajemy wszystkie pliki
+źródłowe.
 
 {%- highlight bash -%}
 git init
@@ -56,11 +72,14 @@ git add submodule https://github.com/weston-embedded/uC-CPU.git
 git add submodule https://github.com/weston-embedded/uC-LIB.git
 {%- endhighlight -%}
 
-Wszystko powyższe możemy wykonać ręcznie i nie ma konieczności użycia gita, jednakże dodanie kodu źródłowego uC/OS-III jako podmodułów ułatwi w przyszłości pracowanie z różnymi wersjami.
+Wszystko powyższe możemy wykonać ręcznie i nie ma konieczności użycia gita,
+jednakże dodanie kodu źródłowego uC/OS-III jako podmodułów ułatwi w
+przyszłości pracowanie z różnymi wersjami.
 
 ## Modyfikacje kodu źródłowego
 
-W dalszej części artykułu zakładamy, że katalog projektu ma następującą hierarchię:
+W dalszej części samouczka zakładamy, że katalog projektu ma następującą
+hierarchię:
 
 ```
 f411ce_ucos/
@@ -79,7 +98,9 @@ f411ce_ucos/
 
 ### Plik startowy
 
-W pliku startowym zmieniamy nazwy funkcji obsługujących przerwania wewnętrzne `PendSV` oraz `SysTick`. W tym celu odszukujemy fragment odpowiadający za przypisania przerwań; będzie to wyglądać mniej wiecej w ten sposób:
+W pliku startowym zmieniamy nazwy funkcji obsługujących przerwania wewnętrzne
+`PendSV` oraz `SysTick`. W tym celu odszukujemy fragment odpowiadający za
+przypisania przerwań; będzie to wyglądać mniej wiecej w ten sposób:
 
 ![pfnVectors](/assets/pfn_vectors.png)
 
@@ -87,7 +108,9 @@ W pliku startowym zmieniamy nazwy funkcji obsługujących przerwania wewnętrzne
 
 ### Pliki szablonowe
 
-Kod źródłowy uC/OS-III dostarczany jest z plikami szablonowymi zawierającymi podstawową konfigurację systemu, która we większości przypadków będzie wystarczająca. Pliki te zazwyczaj znajdują się w folderach `Template/`.
+Kod źródłowy uC/OS-III dostarczany jest z plikami szablonowymi zawierającymi
+podstawową konfigurację systemu, która we większości przypadków będzie
+wystarczająca. Pliki te zazwyczaj znajdują się w folderach `Template/`.
 
 ```
 Middleware/
@@ -109,15 +132,32 @@ Middleware/
     └── Template
         └── bsp_os_dt.c
 ```
-Koniecznymi z punktu widzenia systemu plikami konfiguracyjnymi są `cpu_cfg.h`, `lib_cfg.h`, `os_cfg_app.h` i `os_cfg.h`. Zawierają niezbędne makra konfigurujące funkcjonalność systemu, min. częstotliwość taktowania systemu `OS_CFG_TICK_RATE_HZ`, ilość poziomów priorytetów `OS_CFG_PRIO_MAX`, a także dostępne mechanizmy (np. semafory, timery, kolejki, `OS_CFG_XXX_EN`). 
+Koniecznymi z punktu widzenia systemu plikami konfiguracyjnymi są `cpu_cfg.h`,
+`lib_cfg.h`, `os_cfg_app.h` i `os_cfg.h`. Zawierają niezbędne makra
+konfigurujące funkcjonalność systemu, min. częstotliwość taktowania systemu
+`OS_CFG_TICK_RATE_HZ`, ilość poziomów priorytetów `OS_CFG_PRIO_MAX`, a także
+dostępne mechanizmy (np. semafory, timery, kolejki, `OS_CFG_XXX_EN`).
 
-Plik `bsp_os_dt.c` jest potrzebny w przypadku wykorzystania platformy o zmiennej częstotliwości taktowania procesora i o ile nie zamierza się korzystać z tej funkcjonalności można go pominąć (w pliku `os_cfg.h` makro `OS_CFG_DYN_TICK_EN`, domyślnie wyłączone). Podobnie z plikami `os_app_hooks.c` i `os_app_hooks.h`: służą definiowaniu własnych uchwytów do funkcji systemowych, więc są opcjonalne (makro `OS_CFG_APP_HOOKS_EN`, domyślnie włączone).
+Plik `bsp_os_dt.c` jest potrzebny w przypadku wykorzystania platformy o
+zmiennej częstotliwości taktowania procesora i o ile nie zamierza się
+korzystać z tej funkcjonalności można go pominąć (w pliku `os_cfg.h` makro
+`OS_CFG_DYN_TICK_EN`, domyślnie wyłączone). Podobnie z plikami
+`os_app_hooks.c` i `os_app_hooks.h`: służą definiowaniu własnych uchwytów do
+funkcji systemowych, więc są opcjonalne (makro `OS_CFG_APP_HOOKS_EN`,
+domyślnie włączone).
 
-Pozostałe pliki nagłówkowe i źródłowe przekopiowujemy odpowiednio do folderów `Core/Inc` i `Core/Src`. Warto szczegółowo zapoznać się z ich zawartością tak, aby wiedzieć za co odpowiadają. W razie potrzeby możemy je dostosować.
+Pozostałe pliki nagłówkowe i źródłowe przekopiowujemy odpowiednio do folderów
+`Core/Inc` i `Core/Src`. Warto szczegółowo zapoznać się z ich zawartością
+tak, aby wiedzieć za co odpowiadają. W razie potrzeby możemy je dostosować.
 
 ### Board Support Package
 
-Pliki `bsp.c` i `bsp.h` nie są wymagane bezpośrednio do pracy systemu, ale wspomagają tworzenie aplikacji z wykorzystaniem danej platformy prototypowej. Jako że w niniejszym artykule korzystamy z STM32HAL i STM32CubeMX większość konfiguracji do pracy z naszym mikrokontrolerem zostało już wygenerowane automatycznie, więc pliki BSP nie będą omawiane. Zainteresowanych odsyłam bezpośrednio do dokumentacji systemu uC/OS-III, [podrozdział 18-4][bsp docs].
+Pliki `bsp.c` i `bsp.h` nie są wymagane bezpośrednio do pracy systemu, ale
+wspomagają tworzenie aplikacji z wykorzystaniem danej platformy prototypowej.
+Jako że w niniejszym samouczku korzystamy z STM32HAL i STM32CubeMX większość
+konfiguracji do pracy z naszym mikrokontrolerem zostało już wygenerowane
+automatycznie, więc pliki BSP nie będą omawiane. Zainteresowanych odsyłam
+bezpośrednio do dokumentacji systemu uC/OS-III, [podrozdział 18-4][bsp docs].
 
 ### main.h i main.c
 
@@ -127,29 +167,52 @@ W pliku `main.h` dołączamy plik nagłówkowy systemu uC/OS-III:
 
 W pliku `main.c` podstawowymi zmianami, które musimy wykonać, są:
 
+1. Dodać definicje stałych (opcjonalne, ale zalecane)
+
 ![Private Defines](/assets/pdefine.png)
+
+2. Dodać definicję funkcji stanowiącej ciało głównego zadania
 
 ![Private Function Prototypes](/assets/pfprototypes.png)
 
+3. Dodać TCB głównego zadania oraz zaalokować obszar stosu zadania.
+
 ![Private Variables](/assets/pvariables.png)
 
+4. Dostosować ciało funkcji `main` do pracy z uC/OS-III.
+
 ![Main Function](/assets/mainfunc.png)
+
+5. Zaimplementować funkcję stanowiącą ciało głównego zadania.
 
 ![AppTaskStart Function](/assets/apptaskstartfunc.png)
 
 ### Makefile
 
-W sekcji `C sources` dopisujemy nowododane pliki źródłowe `.c` z folderu `Core/Src`, a także pliki źródłowe uC/OS-III z folderów `Middleware/uC-CPU/`, `Middleware/uC-LIB/`, `Middleware/uC-OS3/Source/`. Ponadto dopisujemy pliki przenośne, które zależne są od architektury wykorzystanego mikrokontrolera. Przykładowo dla STM32F4 będą to pliki `Middleware/uC-CPU/ARM-Cortex-M/ARMv7-M/cpu_c.c` i `Middleware/uC-OS3/Ports/ARM-Cortex-M/ARMv7-M/os_cpu_c.c`.
+W sekcji `C sources` dopisujemy nowododane pliki źródłowe `.c` z folderu
+`Core/Src`, a także pliki źródłowe uC/OS-III z folderów `Middleware/uC-CPU/`,
+`Middleware/uC-LIB/`, `Middleware/uC-OS3/Source/`. Ponadto dopisujemy pliki
+przenośne, które zależne są od architektury wykorzystanego mikrokontrolera.
+Przykładowo dla STM32F4 będą to pliki
+`Middleware/uC-CPU/ARM-Cortex-M/ARMv7-M/cpu_c.c` i
+`Middleware/uC-OS3/Ports/ARM-Cortex-M/ARMv7-M/os_cpu_c.c`.
 
-W sekcji `ASM sources` dopisujemy pliki przenośne, które zależne są zarówno od mikrokontrolera, jak i użytego kompilatora - w naszym przypadku jest toGNU GCC. Kontynuując przykład z STM32F4 interesują nas pliki `Middleware/uC-OS3/Ports/ARM-Cortex-M/ARMv7-M/cpu_a.s`, `Middleware/uC-LIB/Ports/ARM-Cortex-M4/GNU/lib_mem_a.s` i `Middleware/uC-OS3/Ports/ARM-Cortex-M/ARMv7-M/GNU/os_cpu_a.s`
+W sekcji `ASM sources` dopisujemy pliki przenośne, które zależne są zarówno od
+mikrokontrolera, jak i użytego kompilatora - w naszym przypadku jest toGNU
+GCC. Kontynuując przykład z STM32F4 interesują nas pliki
+`Middleware/uC-OS3/Ports/ARM-Cortex-M/ARMv7-M/cpu_a.s`,
+`Middleware/uC-LIB/Ports/ARM-Cortex-M4/GNU/lib_mem_a.s` i
+`Middleware/uC-OS3/Ports/ARM-Cortex-M/ARMv7-M/GNU/os_cpu_a.s`
 
-W sekcji `C includes` dopisujemy foldery z plikami nagłówkowymi systemu uC/OS-III, bibliotek oraz plików przenośnych. Przykładowo dla STM32F4:
+W sekcji `C includes` dopisujemy foldery z plikami nagłówkowymi systemu uC/
+OS-III, bibliotek oraz plików przenośnych. Przykładowo dla STM32F4:
 
 ![C Includes](/assets/c_includes.png)
 
 ## Kompilacja
 
-Tak przygotowany projekt możemy skompilować poleceniem `make`. W wyniku otrzymamy plik `build/xxx.bin`, który można wgrać na mikrokontroler.
+Tak przygotowany projekt możemy skompilować poleceniem `make`. W wyniku
+otrzymamy plik `build/xxx.bin`, który można wgrać na mikrokontroler.
 
 ```
 arm-none-eabi-size build/f411ce_ucos.elf
