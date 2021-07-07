@@ -12,6 +12,8 @@ tags:
 W niniejszym samouczku przygotujemy szablon projektu STM32CubeMX do pracy z
 systemem uC/OS-III.
 
+> **TL;DR** jeśli przybyłeś tu po gotowe rozwiązanie, to zapraszam na moje repozytorium GitHub: [linuxhuskarl/f411ce_ucos](https://github.com/linuxhuskarl/f411ce_ucos).
+>
 > English version is in progress.
 
 ### Motywacja
@@ -43,11 +45,13 @@ funkcje oparte o opóźnienia (np. pooling).
 W zakładce `System Core > SYS` zmieniamy `Timebase Source` na dowolny inny niż
 `SysTick`.
 
-![Timebase Source](/assets/timebase-source.png)
+> **Porada** klikając w dowolny obrazek zobaczysz go w pełnym rozmiarze.
+
+[![Timebase Source](/assets/timebase-source.png)](/assets/timebase-source.png)
 
 W zakładce `Project Manager` zmieniamy `Toolchain/IDE` na `Makefile`.
 
-![Toolchain/IDE](/assets/toolchain-ide.png)
+[![Toolchain/IDE](/assets/toolchain-ide.png)](/assets/toolchain-ide.png)
 
 ## Pobranie kodu źródłowego uC/OS-III
 
@@ -63,7 +67,7 @@ git add *
 git commit -m "Initial commit."
 {%- endhighlight -%}
 
-Następwnie dodajemy pliki źródłowe uC/OS-III jako podmoduły.
+Następnie dodajemy pliki źródłowe uC/OS-III jako podmoduły.
 
 {%- highlight bash -%}
 cd Middleware
@@ -102,9 +106,9 @@ W pliku startowym zmieniamy nazwy funkcji obsługujących przerwania wewnętrzne
 `PendSV` oraz `SysTick`. W tym celu odszukujemy fragment odpowiadający za
 przypisania przerwań; będzie to wyglądać mniej wiecej w ten sposób:
 
-![pfnVectors](/assets/pfn_vectors.png)
+[![pfnVectors](/assets/pfn_vectors.png)](/assets/pfn_vectors.png)
 
-![weakAliases](/assets/weak_aliases.png)
+[![weakAliases](/assets/weak_aliases.png)](/assets/weak_aliases.png)
 
 ### Pliki szablonowe
 
@@ -163,33 +167,33 @@ bezpośrednio do dokumentacji systemu uC/OS-III, [podrozdział 18-4][bsp docs].
 
 W pliku `main.h` dołączamy plik nagłówkowy systemu uC/OS-III:
 
-![main.h](/assets/main_h.png)
+[![main.h](/assets/main_h.png)](/assets/main_h.png)
 
 W pliku `main.c` podstawowymi zmianami, które musimy wykonać, są:
 
 1. Dodać definicje stałych (opcjonalne, ale zalecane)
 
-![Private Defines](/assets/pdefine.png)
+[![Private Defines](/assets/pdefine.png)](/assets/pdefine.png)
 
 {:start="2"}
 2. Dodać definicję funkcji stanowiącej ciało głównego zadania
 
-![Private Function Prototypes](/assets/pfprototypes.png)
+[![Private Function Prototypes](/assets/pfprototypes.png)](/assets/pfprototypes.png)
 
 {:start="3"}
 3. Dodać TCB głównego zadania oraz zaalokować obszar stosu zadania.
 
-![Private Variables](/assets/pvariables.png)
+[![Private Variables](/assets/pvariables.png)](/assets/pvariables.png)
 
 {:start="4"}
 4. Dostosować ciało funkcji `main` do pracy z uC/OS-III.
 
-![Main Function](/assets/mainfunc.png)
+[![Main Function](/assets/mainfunc.png)](/assets/mainfunc.png)
 
 {:start="5"}
 5. Zaimplementować funkcję stanowiącą ciało głównego zadania.
 
-![AppTaskStart Function](/assets/apptaskstartfunc.png)
+[![AppTaskStart Function](/assets/apptaskstartfunc.png)](/assets/apptaskstartfunc.png)
 
 ### Makefile
 
@@ -206,12 +210,17 @@ mikrokontrolera, jak i użytego kompilatora - w naszym przypadku jest toGNU
 GCC. Kontynuując przykład z STM32F4 interesują nas pliki
 `Middleware/uC-OS3/Ports/ARM-Cortex-M/ARMv7-M/cpu_a.s`,
 `Middleware/uC-LIB/Ports/ARM-Cortex-M4/GNU/lib_mem_a.s` i
-`Middleware/uC-OS3/Ports/ARM-Cortex-M/ARMv7-M/GNU/os_cpu_a.s`
+`Middleware/uC-OS3/Ports/ARM-Cortex-M/ARMv7-M/GNU/os_cpu_a.S`
 
 W sekcji `C includes` dopisujemy foldery z plikami nagłówkowymi systemu uC/
 OS-III, bibliotek oraz plików przenośnych. Przykładowo dla STM32F4:
 
-![C Includes](/assets/c_includes.png)
+[![C Includes](/assets/c_includes.png)](/assets/c_includes.png)
+
+W moim przypadku koniecznie również było zmodyfikowanie reguły Makefile tworzącej listę obiektów z nazw plików źródłowych. Mianowicie rozszerzenie pliku `uC-OS3/Ports/ARM-Cortex-M/ARMv7-M/GNU/os_cpu_a.S` jest odmienne od oczekiwanego (`.s`), przez co nie zostaje on poprawnie przetworzony. Aby uniknąć modyfikacji kodu źródłowego z repozytorium uC-OS3:
+
+[![Build objects](/assets/build_objects.png)](/assets/build_objects.png)
+
 
 ## Kompilacja
 
@@ -225,6 +234,5 @@ arm-none-eabi-size build/f411ce_ucos.elf
 arm-none-eabi-objcopy -O ihex build/f411ce_ucos.elf build/f411ce_ucos.hex
 arm-none-eabi-objcopy -O binary -S build/f411ce_ucos.elf build/f411ce_ucos.bin
 ```
-
 
 [bsp docs]: https://micrium.atlassian.net/wiki/spaces/osiiidoc/pages/131426/Board+Support+Package
