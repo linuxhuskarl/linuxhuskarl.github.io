@@ -1,12 +1,15 @@
 ---
-layout: post
+layout: post-with-featured-image
 title:  "Integracja uC/OS-III z projektem STM32CubeMX"
 date:   2021-07-01 17:00:00 +0200
+modified_date: 2021-07-07 14:00:00 +0200
 categories:
   - Embedded
 tags:
   - STM32
   - uC/OS-III
+featured-image: /assets/stm32-unsplash.jpg
+featured-image-alt: Photo by <a href="https://unsplash.com/@vishnumaiea?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Vishnu Mohanan</a> on <a href="https://unsplash.com/s/photos/microcontroller?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
 ---
 
 W niniejszym samouczku przygotujemy szablon projektu STM32CubeMX do pracy z
